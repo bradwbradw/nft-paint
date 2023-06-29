@@ -1,9 +1,9 @@
 
 import { useEffect, useState } from 'react';
-import _ from '../_';
+import _ from 'lodash';
 import { set } from 'lodash';
 
-function Traits({ trait, setTrait, traitValue, setTraitValue }) {
+function Traits({ trait, setTrait, traitValue, setTraitValue, setImageMap }) {
 
   //  localStorage.clear('traits');
   const [traits, setTraits] = useState(JSON.parse(localStorage.getItem('traits') || "[]"));

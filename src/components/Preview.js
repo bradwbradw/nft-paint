@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
-import _ from "../_";
+import _ from "lodash";
+import TraitValueKey from "../module/TraitValueKey";
 
 function Preview({ imageMap, traits }) {
 
@@ -49,17 +50,29 @@ function Preview({ imageMap, traits }) {
   }
 
   function traitsCombined() {
+
     return combineTraits([...traits]);
   }
 
+  function imageUrl(id) {
+    var url = localStorage.getItem('image#' + id);
+    // it's json
+    return JSON.parse(url);
+  }
+
   return (<>num combos:{numCombos}
-    <pre>{JSON.stringify(traitsCombined(), null, 2)}</pre>
+
+    <pre> {/*}{JSON.stringify(traitsCombined(), null, 2)}{*/}
+      <br /><br />image map:<br />
+      {JSON.stringify(imageMap, null, 2)}</pre>
     {_.map(traits, trait => {
       return _.map(trait.values, val => {
+        var traitKey = TraitValueKey(trait.name, val);
 
-        return <div key={trait.name + '-' + val}>
+        return <div key={traitKey}>
 
           {trait.name}-{val}
+          <img src={imageUrl(imageMap[traitKey])} height="50" width="50" />
         </div>
       });
     })}

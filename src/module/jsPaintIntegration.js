@@ -11,6 +11,7 @@ const JsPaintIntegration = {
       p = waitUntil(() => jspaint.systemHooks, 500, () => {
         console.log('setting up hooks for js paint', jspaint.systemHooks);
         // Hook in
+        /*
         jspaint.systemHooks.showSaveFileDialog = async (
           { formats,
             defaultFileName,
@@ -24,11 +25,16 @@ const JsPaintIntegration = {
 
           })
         };
+        */
         jspaint.systemHooks.showOpenFileDialog = async ({ formats }) => {
           console.log("showOpenFileDialog");
         };
+
         jspaint.systemHooks.writeBlobToHandle = async (save_file_handle, blob) => {
-          console.log("writeBlobToHandle");
+          console.log("writeBlobToHandle", save_file_handle, blob);
+          return new Promise((resolve, reject) => {
+            reject("nah")
+          });
         };
         jspaint.systemHooks.readBlobFromHandle = async (file_handle) => {
           console.log("readBlobFromHandle");

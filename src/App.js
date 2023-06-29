@@ -1,14 +1,14 @@
 
 import './App.css';
-import _ from './_';
+import _ from 'lodash';
 
 import Traits from './components/Traits';
 import CanvasEditor from './components/CanvasEditor';
 import Preview from './components/Preview';
 import Pane from './components/Pane';
-import Persistance from './modules/Persistance';
+import Persistance from './module/Persistance';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   //Persistance.remove('imageMap');
@@ -48,15 +48,21 @@ function App() {
           setTrait={setTrait}
           traitValue={traitValue}
           setTraitValue={setTraitValue}
+          setImageMap={setImageMap}
         />
       </Pane>
       <Pane>
-        <Preview imageMap={imageMap} traits={{}} />
+        <Preview imageMap={imageMap} traits={traits} />
 
       </Pane>
     </div>
 
-    <CanvasEditor trait={trait} traitValue={traitValue} />
+    <CanvasEditor
+      trait={trait}
+      traitValue={traitValue}
+      imageMap={imageMap}
+      setImageMap={setImageMap}
+    />
   </>);
 }
 
