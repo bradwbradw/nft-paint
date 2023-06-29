@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import _ from '../_';
+import { set } from 'lodash';
 
 function Traits({ trait, setTrait, traitValue, setTraitValue }) {
 
@@ -33,16 +34,10 @@ function Traits({ trait, setTrait, traitValue, setTraitValue }) {
       NEWVAL:[{newTrait.values}]<br />
       {_.map(traits, (trait) => {
         return <div key={trait.name}>
-          {trait.name} <br /> {trait.values.map(val => {
-            return <div key={trait.name + '-' + val}>
-              <span style={{ marginLeft: '1em' }}>{val}</span> <button onClick={() => {
-                setTrait(trait.name);
-                setTraitValue(val);
-              }}>🖌️</button><br />
-            </div>
-          })}
-          <button onClick={() => {
-
+          {trait.name}
+          <button style={{ marginLeft: '1em' }} onClick={() => {
+            setNewTrait(trait);
+            deleteTrait(trait);
           }}>
             ✏️
           </button>
@@ -50,6 +45,14 @@ function Traits({ trait, setTrait, traitValue, setTraitValue }) {
             onClick={() => { deleteTrait(trait) }}
           > 🗑️
           </button>
+          <br /> {trait.values.map(val => {
+            return <div key={trait.name + '-' + val}>
+              <span style={{ marginLeft: '1em' }}>{val}</span> <button onClick={() => {
+                setTrait(trait.name);
+                setTraitValue(val);
+              }}>🖌️</button><br />
+            </div>
+          })}
         </div>
       })}
       {_.isObject(newTrait) && _.isString(newTrait.name) ? null :
@@ -64,31 +67,71 @@ function Traits({ trait, setTrait, traitValue, setTraitValue }) {
 
       {_.isObject(newTrait) && _.isString(newTrait.name) ?
         <>
-          <input value={newTrait.name} placeholder="new trait name"
+          <input autoFocus value={newTrait.name} placeholder="new trait name"
             onChange={(event) => {
               setNewTrait({
                 name: event.target.value,
                 values: newTrait.values
               })
+            }}
+            onKeyUp={(event) => {
+              console.log(event.key);
+              if (event.key === "Enter") {
+                if (canCreateNewTrait()) {
+                  addTrait(newTrait);
+                } else {
+                  console.log('cannot create new trait', newTrait)
+
+                  setNewTrait({
+                    ...newTrait,
+                    values: [...newTrait.values, ""]
+                  })
+                }
+              }
+
             }}>
           </input>
           <br />
           {newTrait.values.map((val, i) => {
-            return <input key={i} value={val} onChange={
-              (event) => {
-                newTrait.values[i] = event.target.value;
-                setNewTrait({
-                  ...newTrait
-                })
+            return <label
+              key={i}
+              style={{ marginLeft: '2em', display: 'block' }}>
+              trait value: <input autoFocus value={val} onChange={
+                (event) => {
+                  newTrait.values[i] = event.target.value;
+                  setNewTrait({
+                    ...newTrait
+                  })
+                }
               }
-            }></input>
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    setNewTrait({
+                      ...newTrait,
+                      values: [...newTrait.values, ""]
+                    });
+                  }
+                }}
+              ></input>
+              <button onClick={
+                () => {
+                  newTrait.values.splice(i, 1);
+                  setNewTrait({
+                    ...newTrait
+                  });
+                }
+              }>🗑️</button>
+            </label>
           })}
-          <button onClick={() => {
+          <button style={{
+            marginLeft: '2em'
+          }} onClick={() => {
             setNewTrait({
               ...newTrait,
               values: [...newTrait.values, ""]
             })
-          }}>add trait value</button>
+          }}>add</button>
+          <br />
           <button onClick={() => {
             if (canCreateNewTrait()) {
               addTrait(newTrait);
@@ -96,7 +139,8 @@ function Traits({ trait, setTrait, traitValue, setTraitValue }) {
           }}
             disabled={!canCreateNewTrait()}>finish: {newTrait.name}</button>
         </>
-        : null}
+        : null
+      }
 
 
 

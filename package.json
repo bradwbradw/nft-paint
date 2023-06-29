@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && git submodule init && git submodule update",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

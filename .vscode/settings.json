@@ -1,0 +1,6 @@
+{
+  "search.exclude": {
+    "**/public/jspaint": true,
+    "**/public/jspaint/README.md": true
+  }
+}

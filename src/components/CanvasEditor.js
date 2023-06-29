@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import _ from '../_';
 import JsPaintIntegration from '../module/jsPaintIntegration';
+import { tSUndefinedKeyword } from '@babel/types';
 
 function CanvasEditor({ trait, traitValue }) {
 
@@ -9,7 +10,11 @@ function CanvasEditor({ trait, traitValue }) {
 
     var iframe = document.getElementById('jspaint-iframe');
     var jspaint = iframe.contentWindow;
-    JsPaintIntegration.setupHooks(jspaint);
+    if (jspaint) {
+      JsPaintIntegration.setupHooks(jspaint);
+      console.log('jspaint', jspaint);
+      window.jspaint = jspaint;
+    }
 
   }, [trait, traitValue]);
 
