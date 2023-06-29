@@ -34,7 +34,7 @@ function App() {
         />
       </Pane>
       <Pane>
-        <Preview />
+        <Preview traits={{}} />
 
       </Pane>
     </div>
