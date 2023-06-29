@@ -34,14 +34,12 @@ function App() {
         />
       </Pane>
       <Pane>
-
-        <CanvasEditor trait={trait} traitValue={traitValue} />
-      </Pane>
-      <Pane>
         <Preview />
 
       </Pane>
     </div>
+
+    <CanvasEditor trait={trait} traitValue={traitValue} />
   </>);
 }
 

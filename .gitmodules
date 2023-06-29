@@ -1,0 +1,3 @@
+[submodule "public/jspaint"]
+	path = public/jspaint
+	url = git@github.com:bradwbradw/jspaint
