@@ -4,17 +4,19 @@ import JsPaintIntegration from "../module/jsPaintIntegration";
 import TraitValueKey from "../module/TraitValueKey";
 
 var jspaint;
-function CanvasEditor({ trait, traitValue }) {
+function CanvasEditor({ trait, traitValue, onUpdate }) {
   const [id, setId] = useState(null);
   const jsPaintRef = useRef(null);
 
   useEffect(() => {
     var iframe = document.getElementById("jspaint-iframe");
     jspaint = iframe?.contentWindow;
-    if (jspaint) {
+    if (jspaint && jspaint.$G) {
       //JsPaintIntegration.setupHooks(jspaint);
       console.log("jspaint", jspaint);
       window.jspaint = jspaint;
+
+      jspaint.$G.on("session-update", onUpdate);
     } else {
       console.log("no jspaint.");
     }

@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import _ from "lodash";
 import { set } from "lodash";
 
-function Traits({ trait, setTrait, traitValue, setTraitValue, setImageMap }) {
+function Traits({
+  trait,
+  setTrait,
+  traitValue,
+  setTraitValue,
+  setImageMap,
+  onUpdate,
+}) {
   //  localStorage.clear('traits');
   const [traits, setTraits] = useState(
     JSON.parse(localStorage.getItem("traits") || "[]")
@@ -10,14 +17,15 @@ function Traits({ trait, setTrait, traitValue, setTraitValue, setImageMap }) {
   const [newTrait, setNewTrait] = useState({ name: null, values: [] });
 
   function addTrait(p) {
-    setTraits(_.uniq([...traits, p]));
+    setTraits((traits) => _.uniq([...traits, p]));
     setNewTrait("");
   }
   function deleteTrait(p) {
-    setTraits(_.without(traits, p));
+    setTraits((traits) => _.without(traits, p));
   }
   useEffect(() => {
     localStorage.setItem("traits", JSON.stringify(traits));
+    onUpdate();
   }, [traits]);
 
   function canCreateNewTrait() {

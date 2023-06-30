@@ -21,6 +21,7 @@ function App() {
   const [trait, setTrait] = useState(null);
   const [traitValue, setTraitValue] = useState(null);
   const [imageMap, setImageMap] = useState(Persistance.load("imageMap", {}));
+  const [updatedAt, setUpdatedAt] = useState(new Date());
 
   useEffect(() => {
     if (!_.isEmpty(imageMap)) {
@@ -28,6 +29,14 @@ function App() {
       Persistance.save("imageMap", imageMap);
     }
   }, [imageMap]);
+
+  var onUpdate;
+
+  function notifyUpdated() {
+    setTimeout(() => {
+      setUpdatedAt(new Date());
+    }, 500);
+  }
 
   return (
     <>
@@ -50,19 +59,21 @@ function App() {
             traitValue={traitValue}
             setTraitValue={setTraitValue}
             setImageMap={setImageMap}
+            onUpdate={notifyUpdated}
+          />
+
+          <CanvasEditor
+            trait={trait}
+            traitValue={traitValue}
+            imageMap={imageMap}
+            setImageMap={setImageMap}
+            onUpdate={notifyUpdated}
           />
         </Pane>
         <Pane>
-          <Preview imageMap={imageMap} traits={traits} />
+          <Preview imageMap={imageMap} traits={traits} updatedAt={updatedAt} />
         </Pane>
       </div>
-
-      <CanvasEditor
-        trait={trait}
-        traitValue={traitValue}
-        imageMap={imageMap}
-        setImageMap={setImageMap}
-      />
     </>
   );
 }

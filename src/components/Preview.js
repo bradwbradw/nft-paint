@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import _ from "lodash";
+import { DateTime } from "luxon";
 import TraitValueKey from "../module/TraitValueKey";
 
-function Preview({ traits }) {
+function Preview({ traits, updatedAt }) {
   var [numCombos, setNumCombos] = useState(7);
   var [scale, setScale] = useState(1);
   var [previewingCombos, setPreviewingCombos] = useState([]);
@@ -10,7 +11,7 @@ function Preview({ traits }) {
   function combineTraits(traitsToCombine) {
     //return [];
     var [first] = _.pullAt(traitsToCombine, [0]);
-    console.log("first in new combo", first);
+    //console.log("first in new combo", first);
     if (!_.isArray(_.get(first, "values"))) {
       return [];
     } else if (_.size(traitsToCombine) === 1) {
@@ -24,7 +25,7 @@ function Preview({ traits }) {
         });
       });
       var result = _.flatten(arrs);
-      console.log("1 trait combo result", result);
+      //console.log("1 trait combo result", result);
       return result;
     } else {
       var combinations = combineTraits(traitsToCombine);
@@ -33,14 +34,14 @@ function Preview({ traits }) {
         var newArr = _.map(combinations, (c) => {
           c = [{ trait: first.name, value: val }, ...c];
           //          var obj = _.set(c, first.name, val);
-          console.log("found for combo", c);
+          //console.log("found for combo", c);
           return c;
         });
 
         result = [...result, newArr];
       });
       var result = _.flatten(result);
-      console.log("combination result", result);
+      //console.log("combination result", result);
       return result;
     }
   }
@@ -59,7 +60,7 @@ function Preview({ traits }) {
 
   useEffect(() => {
     shuffle();
-  }, [traits, numCombos]);
+  }, [traits, numCombos, updatedAt]);
   //  shuffle();
 
   var width = scale * localStorage.getItem("width") + "px";
@@ -74,6 +75,12 @@ function Preview({ traits }) {
           onChange={(e) => setNumCombos(e.target.value)}
         />
       </label>
+      <pre>
+        updated at:{" "}
+        {new DateTime(updatedAt).toLocaleString(
+          DateTime.DATETIME_FULL_WITH_SECONDS
+        )}
+      </pre>
       <button onClick={shuffle}>shuffle</button>
       num combos:{numCombos}
       {previewingCombos.map((combo, i) => {
