@@ -62,9 +62,8 @@ function Preview({ imageMap, traits }) {
 
   return (<>num combos:{numCombos}
 
-    <pre> {/*}{JSON.stringify(traitsCombined(), null, 2)}{*/}
-      <br /><br />image map:<br />
-      {JSON.stringify(imageMap, null, 2)}</pre>
+    <pre> {JSON.stringify(traitsCombined(), null, 2)}
+      <br /></pre>
     {_.map(traits, trait => {
       return _.map(trait.values, val => {
         var traitKey = TraitValueKey(trait.name, val);
@@ -72,7 +71,7 @@ function Preview({ imageMap, traits }) {
         return <div key={traitKey}>
 
           {trait.name}-{val}
-          <img src={imageUrl(imageMap[traitKey])} height="50" width="50" />
+          <img src={imageUrl(traitKey)} height="50" width="50" />
         </div>
       });
     })}

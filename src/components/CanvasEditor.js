@@ -24,7 +24,7 @@ function CanvasEditor({ trait, traitValue, imageMap, setImageMap }) {
     var key = TraitValueKey(trait, traitValue);
 
     if (key && key.length > 3) {
-      setId(_.get(imageMap, key));
+      setId(key);
     }
 
   }, [trait, traitValue]);
