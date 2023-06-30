@@ -1,75 +1,63 @@
-
-import { useEffect, useRef, useState } from 'react';
-import _ from 'lodash';
-import JsPaintIntegration from '../module/jsPaintIntegration';
-import TraitValueKey from '../module/TraitValueKey';
+import { useEffect, useRef, useState } from "react";
+import _ from "lodash";
+import JsPaintIntegration from "../module/jsPaintIntegration";
+import TraitValueKey from "../module/TraitValueKey";
 
 var jspaint;
-function CanvasEditor({ trait, traitValue, imageMap, setImageMap }) {
-
+function CanvasEditor({ trait, traitValue }) {
   const [id, setId] = useState(null);
   const jsPaintRef = useRef(null);
 
   useEffect(() => {
-
-    var iframe = document.getElementById('jspaint-iframe');
+    var iframe = document.getElementById("jspaint-iframe");
     jspaint = iframe?.contentWindow;
     if (jspaint) {
       //JsPaintIntegration.setupHooks(jspaint);
-      console.log('jspaint', jspaint);
+      console.log("jspaint", jspaint);
       window.jspaint = jspaint;
     } else {
-      console.log('no jspaint.');
+      console.log("no jspaint.");
     }
     var key = TraitValueKey(trait, traitValue);
 
-    if (key && key.length > 3) {
+    if (key && key.length > 0) {
       setId(key);
     }
-
   }, [trait, traitValue]);
 
+  function makeJsPaintUrl() {
+    var url = "jspaint/index.html";
 
-  function Canvas({ hidden }) {
-    var url = 'jspaint/index.html';
-    if (id && id.length > 3) {
-      url = url + "#local:" + id;
+    if (id && id.length > 0) {
+      url = url + "#local:" + id; // + "-" + session;
     }
-    return <iframe
-      ref={jsPaintRef}
-      src={url}
-      width="600"
-      height="500"
-      id="jspaint-iframe"
-      style={hidden ? { display: 'none' } : {}} />;
+    return url;
   }
-
 
   function save() {
-    var id = jspaint.get_url_param('local');
-
-    setImageMap(map => {
-      map = { ...map, ..._.set({}, `${trait}-${traitValue}`, id) };
-      console.log('set image map', map);
-      return map;
-    }
-    );
+    var id = jspaint.get_url_param("local");
   }
   return trait && traitValue ? (
-    <><h4>draw a {traitValue} {trait}</h4>
-      <button onClick={save}>
-        save {TraitValueKey(trait, traitValue)}
-      </button> <pre>{id}</pre>
+    <>
+      <h4>
+        draw a {traitValue} {trait}
+      </h4>
+      <button onClick={save}>save {TraitValueKey(trait, traitValue)}</button>{" "}
+      <pre>{makeJsPaintUrl()}</pre>
       <br />
-      <Canvas hidden={false} />
+      <iframe
+        ref={jsPaintRef}
+        src={makeJsPaintUrl()}
+        width="600"
+        height="500"
+        id="jspaint-iframe"
+      />
     </>
   ) : (
     <>
-
       <h4>select a trait </h4>
     </>
   );
 }
 
-
-export default CanvasEditor
+export default CanvasEditor;
