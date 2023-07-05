@@ -11,20 +11,23 @@ function CanvasEditor({ trait, traitValue, onUpdate }) {
   useEffect(() => {
     var iframe = document.getElementById("jspaint-iframe");
     jspaint = iframe?.contentWindow;
-    if (jspaint && jspaint.$G) {
-      //JsPaintIntegration.setupHooks(jspaint);
-      console.log("jspaint", jspaint);
-      window.jspaint = jspaint;
+    setTimeout(() => {
+      if (jspaint && jspaint.$G) {
+        //JsPaintIntegration.setupHooks(jspaint);
+        console.log("jspaint", jspaint);
+        window.jspaint = jspaint;
 
-      jspaint.$G.on("session-update", onUpdate);
-    } else {
-      console.log("no jspaint.");
-    }
-    var key = TraitValueKey(trait, traitValue);
+        jspaint.$G.on("session-update", onUpdate);
+        jspaint.$G.on("persisted-image", onUpdate);
+      } else {
+        console.log("no jspaint.");
+      }
+      var key = TraitValueKey(trait, traitValue);
 
-    if (key && key.length > 0) {
-      setId(key);
-    }
+      if (key && key.length > 0) {
+        setId(key);
+      }
+    }, 1000);
   }, [trait, traitValue]);
 
   function makeJsPaintUrl() {
@@ -39,13 +42,15 @@ function CanvasEditor({ trait, traitValue, onUpdate }) {
   function save() {
     var id = jspaint.get_url_param("local");
   }
-  return trait && traitValue ? (
-    <>
+  if (!_.isString(traitValue)) {
+    traitValue = "000demo000";
+  }
+
+  return (
+    <div style={{ position: "fixed" }}>
       <h4>
         draw a {traitValue} {trait}
       </h4>
-      <button onClick={save}>save {TraitValueKey(trait, traitValue)}</button>{" "}
-      <pre>{makeJsPaintUrl()}</pre>
       <br />
       <iframe
         ref={jsPaintRef}
@@ -54,11 +59,8 @@ function CanvasEditor({ trait, traitValue, onUpdate }) {
         height="500"
         id="jspaint-iframe"
       />
-    </>
-  ) : (
-    <>
-      <h4>select a trait </h4>
-    </>
+      <pre>{makeJsPaintUrl()}</pre>
+    </div>
   );
 }
 
