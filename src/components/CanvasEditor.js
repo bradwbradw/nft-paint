@@ -17,8 +17,10 @@ function CanvasEditor({ trait, traitValue, onUpdate }) {
         console.log("jspaint", jspaint);
         window.jspaint = jspaint;
 
-        jspaint.$G.on("session-update", onUpdate);
-        jspaint.$G.on("persisted-image", onUpdate);
+        jspaint.$G.on("persisted-image", () => {
+          console.log("got persisted-image");
+          onUpdate();
+        });
       } else {
         console.log("no jspaint.");
       }
