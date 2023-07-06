@@ -17,6 +17,7 @@
     "web-vitals": "^3.3.0"
   },
   "scripts": {
+    "postinstall": "if-env NODE_ENV=production && npm run build || echo 'skipping prod build'",
     "start": "react-scripts start",
     "build": "react-scripts build && git submodule init && git submodule update",
     "test": "react-scripts test",
