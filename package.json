@@ -20,7 +20,7 @@
   "scripts": {
     "postinstall": "if-env NODE_ENV=production && npm run build || echo 'skipping prod build' && git submodule update --init --remote",
     "start": "react-scripts start",
-    "build": "git submodule deinit --all && git submodule update --init --remote && react-scripts build",
+    "build": "git submodule deinit public/jspaint && git submodule update --init --remote && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
