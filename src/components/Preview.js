@@ -45,69 +45,126 @@ function Preview({
     setTraits(newTraits);
   }
 
+  function isLocked(trait, value) {
+    return _.includes(_.get(trait, "locked", []), value);
+  }
+
   function TraitEditor({ style }) {
     return (
       <>
         <div style={style}>
           <h4>traits</h4>
-          NEW:[{newTrait.name}]<br />
-          NEWVAL:[{newTrait.values}]<br />
           {_.map(traits, (trait, i) => {
             return (
-              <div key={trait.name} style={{ border: "1px solid orange" }}>
-                {trait.name}
-                <button
-                  style={{ marginLeft: "1em" }}
-                  onClick={() => {
-                    setNewTrait(trait);
-                    deleteTrait(trait);
-                  }}
-                >
-                  ✏️
-                </button>
-                <button
-                  onClick={() => {
-                    deleteTrait(trait);
-                  }}
-                >
-                  {" "}
-                  🗑️
-                </button>
-                {i > 0 ? (
+              <div
+                key={trait.name}
+                style={{
+                  border: "1px solid orange",
+                  display: "flex",
+                  gap: "2em",
+                }}
+              >
+                <div>
+                  {trait.name}
                   <button
+                    style={{ marginLeft: "1em" }}
                     onClick={() => {
-                      reorderTrait(i, true);
+                      setNewTrait(trait);
+                      deleteTrait(trait);
                     }}
                   >
-                    ⬆️
+                    ✏️
                   </button>
-                ) : null}
-                {i < _.size(traits) - 1 ? (
                   <button
                     onClick={() => {
-                      reorderTrait(i, false);
+                      deleteTrait(trait);
                     }}
                   >
-                    ⬇️
+                    {" "}
+                    🗑️
                   </button>
-                ) : null}
-                <br />{" "}
-                {trait.values.map((val) => {
-                  return (
-                    <div key={trait.name + "-" + val}>
-                      <span style={{ marginLeft: "1em" }}>{val}</span>{" "}
-                      <button
+                  {i > 0 ? (
+                    <button
+                      onClick={() => {
+                        reorderTrait(i, true);
+                      }}
+                    >
+                      ⬆️
+                    </button>
+                  ) : null}
+                  {i < _.size(traits) - 1 ? (
+                    <button
+                      onClick={() => {
+                        reorderTrait(i, false);
+                      }}
+                    >
+                      ⬇️
+                    </button>
+                  ) : null}
+                  <br />{" "}
+                  {trait.values.map((val) => {
+                    return (
+                      <div key={trait.name + "-" + val}>
+                        <span style={{ marginLeft: "1em" }}>{val}</span>{" "}
+                        <button
+                          onClick={() => {
+                            setTrait(trait.name);
+                            setTraitValue(val);
+                          }}
+                        >
+                          🎨
+                        </button>
+                        <br />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", gap: "1em" }}>
+                  {trait.values.map((val) => {
+                    var key = TraitValueKey(trait.name, val);
+                    return (
+                      <div
+                        key={key}
+                        style={{
+                          padding: "5px",
+                          ...(isLocked(trait, val)
+                            ? { border: "3px solid red" }
+                            : {}),
+                        }}
                         onClick={() => {
-                          setTrait(trait.name);
-                          setTraitValue(val);
+                          trait.locked = [..._.get(trait, "locked", [])];
+                          if (isLocked(trait, val)) {
+                            setTraits((traits) => {
+                              console.log(traits);
+                              var newTraits = [...traits];
+                              newTraits.splice(i, 1, {
+                                ...trait,
+                                values: trait.values,
+                                locked: _.without(trait.locked, val),
+                              });
+                              console.log("newTraits", newTraits);
+                              return newTraits;
+                            });
+                          } else {
+                            setTraits((traits) => {
+                              console.log(traits);
+                              var newTraits = [...traits];
+                              newTraits.splice(i, 1, {
+                                ...trait,
+                                values: trait.values,
+                                locked: _.uniq([...trait.locked, val]),
+                              });
+                              console.log("newTraits", newTraits);
+                              return newTraits;
+                            });
+                          }
                         }}
                       >
-                        🖌️
-                      </button>
-                      <br />
-                    </div>
-                  );
-                })}
+                        <img src={imageUrl(key)} width="50" />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
@@ -230,8 +287,17 @@ function Preview({
     if (!_.isArray(_.get(first, "values"))) {
       return [];
     } else if (_.size(traitsToCombine) === 1) {
-      var arrs = _.map(first.values, (val1) => {
-        return _.map(traitsToCombine[0].values, (val2) => {
+      var valuesToMix = first.values;
+      if (_.size(first.locked) > 0) {
+        valuesToMix = first.locked;
+      }
+      var arrs = _.map(valuesToMix, (val1) => {
+        var valuesToMix2 = traitsToCombine[0].values;
+        if (_.size(traitsToCombine[0].locked) > 0) {
+          valuesToMix2 = traitsToCombine[0].locked;
+        }
+
+        return _.map(valuesToMix2, (val2) => {
           var obj1 = _.set({}, "trait", first.name);
           _.set(obj1, "value", val1); //, val1);
           var obj2 = _.set({}, "trait", traitsToCombine[0].name);
@@ -245,7 +311,12 @@ function Preview({
     } else {
       var combinations = combineTraits(traitsToCombine);
       var result = [];
-      _.each(first.values, (val) => {
+      var valuesToMix3 = first.values;
+      if (_.size(first.locked) > 0) {
+        valuesToMix3 = first.locked;
+      }
+
+      _.each(valuesToMix3, (val) => {
         var newArr = _.map(combinations, (c) => {
           c = [{ trait: first.name, value: val }, ...c];
           //          var obj = _.set(c, first.name, val);
@@ -284,21 +355,6 @@ function Preview({
     <>
       <div>
         <TraitEditor style={{ width: "49%", display: "inline" }} />
-
-        <div style={{ width: "49%", float: "right", display: "inline" }}>
-          {_.map(traits, (trait) => {
-            return _.map(trait.values, (val) => {
-              var traitKey = TraitValueKey(trait.name, val);
-
-              return (
-                <div key={traitKey}>
-                  {trait.name}-{val}
-                  <img src={imageUrl(traitKey)} height="50" width="50" />
-                </div>
-              );
-            });
-          })}
-        </div>
       </div>
       <label>
         number of previews
