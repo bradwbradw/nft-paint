@@ -402,6 +402,15 @@ function Preview({
                 return (
                   <li key={layer.key}>
                     {layer.trait}: {layer.value}
+                    {"   "}
+                    <button
+                      onClick={() => {
+                        setTrait(layer.trait);
+                        setTraitValue(layer.value);
+                      }}
+                    >
+                      🎨
+                    </button>
                   </li>
                 );
               })}
