@@ -1,284 +1,24 @@
 import { useEffect, useState } from "react";
 import _ from "lodash";
 import { DateTime } from "luxon";
+import TraitEditor from "./TraitEditor";
 import TraitValueKey from "../module/TraitValueKey";
+import ImageUrl from "../module/ImageUrl";
 
 function Preview({
   trait,
-  setTrait,
   traitValue,
+  setTrait,
   setTraitValue,
   traits,
   setTraits,
   onUpdate,
   updatedAt,
 }) {
-  const [newTrait, setNewTrait] = useState({ name: null, values: [] });
-
-  function addTrait(p) {
-    setTraits((traits) => _.uniq([...traits, p]));
-    setNewTrait("");
-  }
-  function deleteTrait(p) {
-    setTraits((traits) => _.without(traits, p));
-  }
-  useEffect(() => {
-    localStorage.setItem("traits", JSON.stringify(traits));
-    onUpdate();
-  }, [traits]);
-
-  function canCreateNewTrait() {
-    return (
-      _.isString(newTrait.name) &&
-      !_.isEmpty(newTrait.name) &&
-      _.isArray(newTrait.values) &&
-      _.size(newTrait.values) > 0 &&
-      !_.includes(newTrait.values, "")
-    );
-  }
-
-  function reorderTrait(traitIndex, up) {
-    var trait = traits[traitIndex];
-    var newTraits = [...traits];
-    newTraits.splice(traitIndex, 1);
-    newTraits.splice(traitIndex + (up ? -1 : 1), 0, trait);
-    setTraits(newTraits);
-  }
-
-  function isLocked(trait, value) {
-    return _.includes(_.get(trait, "locked", []), value);
-  }
-
-  function TraitEditor({ style }) {
-    return (
-      <>
-        <div style={style}>
-          <h4>traits</h4>
-          {_.map(traits, (trait, i) => {
-            return (
-              <div
-                key={trait.name}
-                style={{
-                  border: "1px solid orange",
-                  display: "flex",
-                  gap: "2em",
-                }}
-              >
-                <div>
-                  {trait.name}
-                  <button
-                    style={{ marginLeft: "1em" }}
-                    onClick={() => {
-                      setNewTrait(trait);
-                      deleteTrait(trait);
-                    }}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => {
-                      deleteTrait(trait);
-                    }}
-                  >
-                    {" "}
-                    🗑️
-                  </button>
-                  {i > 0 ? (
-                    <button
-                      onClick={() => {
-                        reorderTrait(i, true);
-                      }}
-                    >
-                      ⬆️
-                    </button>
-                  ) : null}
-                  {i < _.size(traits) - 1 ? (
-                    <button
-                      onClick={() => {
-                        reorderTrait(i, false);
-                      }}
-                    >
-                      ⬇️
-                    </button>
-                  ) : null}
-                  <br />{" "}
-                  {trait.values.map((val) => {
-                    return (
-                      <div key={trait.name + "-" + val}>
-                        <span style={{ marginLeft: "1em" }}>{val}</span>{" "}
-                        <button
-                          onClick={() => {
-                            setTrait(trait.name);
-                            setTraitValue(val);
-                          }}
-                        >
-                          🎨
-                        </button>
-                        <br />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{ display: "flex", gap: "1em" }}>
-                  {trait.values.map((val) => {
-                    var key = TraitValueKey(trait.name, val);
-                    return (
-                      <div
-                        key={key}
-                        style={{
-                          padding: "5px",
-                          ...(isLocked(trait, val)
-                            ? { border: "3px solid red" }
-                            : {}),
-                        }}
-                        onClick={() => {
-                          trait.locked = [..._.get(trait, "locked", [])];
-                          if (isLocked(trait, val)) {
-                            setTraits((traits) => {
-                              console.log(traits);
-                              var newTraits = [...traits];
-                              newTraits.splice(i, 1, {
-                                ...trait,
-                                values: trait.values,
-                                locked: _.without(trait.locked, val),
-                              });
-                              console.log("newTraits", newTraits);
-                              return newTraits;
-                            });
-                          } else {
-                            setTraits((traits) => {
-                              console.log(traits);
-                              var newTraits = [...traits];
-                              newTraits.splice(i, 1, {
-                                ...trait,
-                                values: trait.values,
-                                locked: _.uniq([...trait.locked, val]),
-                              });
-                              console.log("newTraits", newTraits);
-                              return newTraits;
-                            });
-                          }
-                        }}
-                      >
-                        <img src={imageUrl(key)} width="50" />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {_.isObject(newTrait) && _.isString(newTrait.name) ? null : (
-          <button
-            onClick={(e) => {
-              setNewTrait({
-                name: "",
-                values: [],
-              });
-              e.preventDefault();
-            }}
-          >
-            {" "}
-            add new trait{" "}
-          </button>
-        )}
-        {_.isObject(newTrait) && _.isString(newTrait.name) ? (
-          <>
-            <input
-              autoFocus
-              value={newTrait.name}
-              placeholder="new trait name"
-              onChange={(event) => {
-                setNewTrait({
-                  name: event.target.value,
-                  values: newTrait.values,
-                });
-              }}
-              onKeyUp={(event) => {
-                console.log(event.key);
-                if (event.key === "Enter") {
-                  if (canCreateNewTrait()) {
-                    addTrait(newTrait);
-                  } else {
-                    console.log("cannot create new trait", newTrait);
-
-                    setNewTrait({
-                      ...newTrait,
-                      values: [...newTrait.values, ""],
-                    });
-                  }
-                }
-              }}
-            ></input>
-            <br />
-            {newTrait.values.map((val, i) => {
-              return (
-                <label key={i} style={{ marginLeft: "2em", display: "block" }}>
-                  trait value:{" "}
-                  <input
-                    autoFocus
-                    value={val}
-                    onChange={(event) => {
-                      newTrait.values[i] = event.target.value;
-                      setNewTrait({
-                        ...newTrait,
-                      });
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        setNewTrait({
-                          ...newTrait,
-                          values: [...newTrait.values, ""],
-                        });
-                      }
-                    }}
-                  ></input>
-                  <button
-                    onClick={() => {
-                      newTrait.values.splice(i, 1);
-                      setNewTrait({
-                        ...newTrait,
-                      });
-                    }}
-                  >
-                    🗑️
-                  </button>
-                </label>
-              );
-            })}
-            <button
-              style={{
-                marginLeft: "2em",
-              }}
-              onClick={() => {
-                setNewTrait({
-                  ...newTrait,
-                  values: [...newTrait.values, ""],
-                });
-              }}
-            >
-              add
-            </button>
-            <br />
-            <button
-              onClick={() => {
-                if (canCreateNewTrait()) {
-                  addTrait(newTrait);
-                }
-              }}
-              disabled={!canCreateNewTrait()}
-            >
-              finish: {newTrait.name}
-            </button>
-          </>
-        ) : null}
-      </>
-    );
-  }
   var [numCombos, setNumCombos] = useState(7);
   var [scale, setScale] = useState(1);
   var [previewingCombos, setPreviewingCombos] = useState([]);
+  const [autoShuffle, setAutoShuffle] = useState(true);
 
   function combineTraits(traitsToCombine) {
     //return [];
@@ -332,12 +72,6 @@ function Preview({
     }
   }
 
-  function imageUrl(id) {
-    var url = localStorage.getItem("image#" + id);
-    // it's json
-    return JSON.parse(url);
-  }
-
   function shuffle() {
     var t = combineTraits([...traits]);
     var sampled = _.sampleSize(t, numCombos);
@@ -345,36 +79,98 @@ function Preview({
   }
 
   useEffect(() => {
-    shuffle();
+    if (autoShuffle) {
+      shuffle();
+    }
   }, [traits, numCombos, updatedAt]);
   //  shuffle();
+
+  function isLocked(trait, value) {
+    return _.includes(_.get(trait, "locked", []), value);
+  }
+
+  function toggleLocked(trait, val) {
+    var i = _.findIndex(traits, (t) => t.name === trait.name);
+    trait.locked = [..._.get(trait, "locked", [])];
+    if (isLocked(trait, val)) {
+      setTraits((traits) => {
+        console.log(traits);
+        var newTraits = [...traits];
+        newTraits.splice(i, 1, {
+          ...trait,
+          values: trait.values,
+          locked: _.without(trait.locked, val),
+        });
+        console.log("newTraits", newTraits);
+        return newTraits;
+      });
+    } else {
+      setTraits((traits) => {
+        console.log(traits);
+        var newTraits = [...traits];
+        newTraits.splice(i, 1, {
+          ...trait,
+          values: trait.values,
+          locked: _.uniq([...trait.locked, val]),
+        });
+        console.log("newTraits", newTraits);
+        return newTraits;
+      });
+    }
+  }
 
   var width = scale * localStorage.getItem("width") + "px";
   var height = scale * localStorage.getItem("height") + "px";
   return (
     <>
-      <div>
-        <TraitEditor style={{ width: "49%", display: "inline" }} />
-      </div>
-      <label>
-        number of previews
-        <input
-          type="number"
-          value={numCombos}
-          onChange={(e) => setNumCombos(e.target.value)}
+      <div style={{ margin: "1em" }}>
+        <TraitEditor
+          traits={traits}
+          setTraits={setTraits}
+          setTrait={setTrait}
+          setTraitValue={setTraitValue}
+          onUpdate={onUpdate}
+          isLocked={isLocked}
+          toggleLocked={toggleLocked}
+          style={{ width: "49%", display: "inline" }}
         />
-      </label>
-      <button onClick={shuffle}>shuffle</button>
-      <pre>
-        updated at:{" "}
-        {new DateTime(updatedAt).toLocaleString(
-          DateTime.DATETIME_FULL_WITH_SECONDS
-        )}
-      </pre>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          padding: "1em",
+          margin: "1em",
+          gap: "1em",
+          border: "1px dashed black",
+        }}
+      >
+        <label>
+          number of previews
+          <input
+            type="number"
+            value={numCombos}
+            onChange={(e) => setNumCombos(e.target.value)}
+          />
+        </label>
+        <label>
+          auto-generate
+          <input
+            type="checkbox"
+            checked={autoShuffle}
+            onChange={(e) => setAutoShuffle(e.target.checked)}
+          />
+        </label>
+        <button
+          style={{ border: "2px solid pink", fontSize: "1.2em" }}
+          onClick={shuffle}
+        >
+          (re)generate previews
+        </button>
+      </div>
       {previewingCombos.map((combo, i) => {
         var layers = _.map(combo, ({ trait, value }) => {
           var key = TraitValueKey(trait, value);
-          return { key, trait, value, url: imageUrl(key) };
+          return { key, trait, value, url: ImageUrl(key) };
         });
         //<pre>{JSON.stringify(urls, null, 2)}</pre>;
         return (
@@ -382,27 +178,40 @@ function Preview({
             key={i}
             style={{
               display: "flex",
-              width: "45vw",
-              border: "1px solid green",
+              minWidth: "45vw",
+              padding: "1em",
+              gap: "1em",
             }}
           >
-            <div style={{ border: "1px solid blue", width, height }}>
+            <div
+              style={{
+                border: "1px solid blue",
+                width,
+                height,
+                flexShrink: "0",
+              }}
+            >
               {layers.map((layer) => {
                 return (
                   <img
                     key={layer.key}
-                    style={{ position: "absolute" }}
+                    style={{ position: "absolute", width, height }}
                     src={layer.url}
                   />
                 );
               })}
             </div>
-            <ul>
+            <div>
               {layers.map((layer) => {
                 return (
-                  <li key={layer.key}>
-                    {layer.trait}: {layer.value}
-                    {"   "}
+                  <div
+                    key={layer.key}
+                    style={{
+                      display: "flex",
+                      gap: "0.5em",
+                      alignItems: "center",
+                    }}
+                  >
                     <button
                       onClick={() => {
                         setTrait(layer.trait);
@@ -411,14 +220,36 @@ function Preview({
                     >
                       🎨
                     </button>
-                  </li>
+                    <div
+                      style={{
+                        cursor: "pointer",
+                        ...(isLocked(
+                          _.find(traits, (t) => t.name === layer.trait),
+                          layer.value
+                        )
+                          ? {
+                              fontWeight: "bold",
+                            }
+                          : {}),
+                      }}
+                      onClick={() => {
+                        toggleLocked(
+                          _.find(traits, (t) => t.name === layer.trait),
+                          layer.value
+                        );
+                      }}
+                    >
+                      {layer.trait}: {layer.value}
+                    </div>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           </div>
         );
       })}
       <button
+        style={{ marginTop: "50em", color: "red" }}
         onClick={() => {
           traits.map((trait) => {
             trait.values.map((val) => {
