@@ -44,22 +44,20 @@ function CanvasEditor({ trait, traitValue, onUpdate, below }) {
   function save() {
     var id = jspaint.get_url_param("local");
   }
-  if (!_.isString(traitValue)) {
-    traitValue = "000demo000";
-  }
 
   return (
     <div
       style={{
         width: "100%",
-        height: "40em",
+        height: "50em",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
       }}
     >
+      <h3>Time to Draw!</h3>
       <h2>
-        {trait}: {traitValue} ~ time to draw!
+        {trait}: {traitValue}
       </h2>
       <br />
       <iframe

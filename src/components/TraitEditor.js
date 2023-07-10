@@ -5,6 +5,7 @@ import ImageUrl from "../module/ImageUrl";
 import ConfirmDialog from "../module/ConfirmDialog";
 
 function TraitEditor({
+  trait,
   traits,
   setTraits,
   setTrait,
@@ -50,9 +51,13 @@ function TraitEditor({
   function isExpanded(trait) {
     return _.get(trait, "expanded", true);
   }
-  function startEditing(trait) {
-    setModifyingTraitIndex(_.indexOf(traits, trait));
-    setNewTrait(trait);
+  var changeTrait = null;
+  function startEditing(t) {
+    if (trait && trait.name === t.name) {
+      changeTrait = trait.name;
+    }
+    setModifyingTraitIndex(_.indexOf(traits, t));
+    setNewTrait(t);
   }
 
   function NewTrait() {
@@ -182,6 +187,10 @@ function TraitEditor({
                     return newTraits;
                   });
                   setNewTrait({ name: null, values: [] });
+                  if (changeTrait) {
+                    setTrait(null);
+                    changeTrait = null;
+                  }
                 } else if (canCreateNewTrait()) {
                   addTrait(newTrait);
                 }

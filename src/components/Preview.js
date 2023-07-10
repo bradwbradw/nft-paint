@@ -102,6 +102,7 @@ function Preview({
     <>
       <div style={{ margin: "1em" }}>
         <TraitEditor
+          trait={trait}
           traits={traits}
           setTraits={setTraits}
           setTrait={setTrait}
