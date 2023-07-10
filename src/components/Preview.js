@@ -14,6 +14,8 @@ function Preview({
   setTraits,
   onUpdate,
   updatedAt,
+  toggleLocked,
+  isLocked,
 }) {
   var [numCombos, setNumCombos] = useState(7);
   var [scale, setScale] = useState(1);
@@ -85,38 +87,13 @@ function Preview({
   }, [traits, numCombos, updatedAt]);
   //  shuffle();
 
-  function isLocked(trait, value) {
-    return _.includes(_.get(trait, "locked", []), value);
-  }
-
-  function toggleLocked(trait, val) {
-    var i = _.findIndex(traits, (t) => t.name === trait.name);
-    trait.locked = [..._.get(trait, "locked", [])];
-    if (isLocked(trait, val)) {
-      setTraits((traits) => {
-        console.log(traits);
-        var newTraits = [...traits];
-        newTraits.splice(i, 1, {
-          ...trait,
-          values: trait.values,
-          locked: _.without(trait.locked, val),
-        });
-        console.log("newTraits", newTraits);
-        return newTraits;
+  function unlockAll() {
+    setTraits((traits) => {
+      var newTraits = _.map(traits, (trait) => {
+        return { ...trait, locked: [] };
       });
-    } else {
-      setTraits((traits) => {
-        console.log(traits);
-        var newTraits = [...traits];
-        newTraits.splice(i, 1, {
-          ...trait,
-          values: trait.values,
-          locked: _.uniq([...trait.locked, val]),
-        });
-        console.log("newTraits", newTraits);
-        return newTraits;
-      });
-    }
+      return newTraits;
+    });
   }
 
   var width = scale * localStorage.getItem("width") + "px";
@@ -144,6 +121,21 @@ function Preview({
           border: "1px dashed black",
         }}
       >
+        <button
+          style={{ border: "2px solid pink", fontSize: "1.2em" }}
+          onClick={shuffle}
+        >
+          (re)generate previews
+        </button>
+
+        <label>
+          auto-generate
+          <input
+            type="checkbox"
+            checked={autoShuffle}
+            onChange={(e) => setAutoShuffle(e.target.checked)}
+          />
+        </label>
         <label>
           number of previews
           <input
@@ -153,23 +145,14 @@ function Preview({
           />
         </label>
         <label>
-          auto-generate
-          <input
-            type="checkbox"
-            checked={autoShuffle}
-            onChange={(e) => setAutoShuffle(e.target.checked)}
-          />
+          number locked: {_.size(_.flatten(_.map(traits, "locked")))}
+          <button onClick={unlockAll}>unlock all</button>
         </label>
-        <button
-          style={{ border: "2px solid pink", fontSize: "1.2em" }}
-          onClick={shuffle}
-        >
-          (re)generate previews
-        </button>
       </div>
       {previewingCombos.map((combo, i) => {
         var layers = _.map(combo, ({ trait, value }) => {
           var key = TraitValueKey(trait, value);
+
           return { key, trait, value, url: ImageUrl(key) };
         });
         //<pre>{JSON.stringify(urls, null, 2)}</pre>;
@@ -178,13 +161,14 @@ function Preview({
             key={i}
             style={{
               display: "flex",
-              minWidth: "45vw",
+              flexWrap: "wrap",
               padding: "1em",
-              gap: "1em",
+              gap: "0.5em",
             }}
           >
             <div
               style={{
+                position: "relative",
                 border: "1px solid blue",
                 width,
                 height,

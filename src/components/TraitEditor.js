@@ -295,13 +295,17 @@ function TraitEditor({
           >
             add
           </button>
-          <button
-            onClick={() => {
-              setNewTrait({ name: null, values: [] });
-            }}
-          >
-            nevermind
-          </button>
+          {canCreateNewTrait() ? (
+            <></>
+          ) : (
+            <button
+              onClick={() => {
+                setNewTrait({ name: null, values: [] });
+              }}
+            >
+              nevermind
+            </button>
+          )}
           <br />
           <button
             onClick={() => {

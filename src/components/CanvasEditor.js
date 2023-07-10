@@ -4,7 +4,7 @@ import JsPaintIntegration from "../module/jsPaintIntegration";
 import TraitValueKey from "../module/TraitValueKey";
 
 var jspaint;
-function CanvasEditor({ trait, traitValue, onUpdate }) {
+function CanvasEditor({ trait, traitValue, onUpdate, below }) {
   const [id, setId] = useState(null);
   const jsPaintRef = useRef(null);
 
@@ -49,19 +49,29 @@ function CanvasEditor({ trait, traitValue, onUpdate }) {
   }
 
   return (
-    <div style={{ position: "fixed" }}>
-      <h4>
-        draw a {traitValue} {trait}
-      </h4>
+    <div
+      style={{
+        width: "100%",
+        height: "40em",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <h2>
+        {trait}: {traitValue} ~ time to draw!
+      </h2>
       <br />
       <iframe
         ref={jsPaintRef}
         src={makeJsPaintUrl()}
-        width="600"
-        height="500"
         id="jspaint-iframe"
+        style={{ width: "100%", height: "100%" }}
       />
+
       <pre>{makeJsPaintUrl()}</pre>
+
+      {below}
     </div>
   );
 }
