@@ -1,18 +1,22 @@
 import "./App.css";
-import _ from "lodash";
+import _, { set } from "lodash";
 
 import CanvasEditor from "./components/CanvasEditor";
 import Preview from "./components/Preview";
-import Pane from "./components/Pane";
 import Persistance from "./module/Persistance";
 import Panels from "./components/Panels";
 
 import TraitValueKey from "./module/TraitValueKey";
-import ImageUrl from "./module/ImageUrl";
+
+// import localstoragekey and imageurl
+import { ImageUrl, localStorageKey } from "./module/ImageUrl";
+
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 import { useState, useEffect } from "react";
+
+import ConfirmDialog from "./module/ConfirmDialog";
 
 console.clear();
 function App() {
@@ -21,6 +25,8 @@ function App() {
   const [traitValue, setTraitValue] = useState(null);
   const [width, setWidth] = useState(Persistance.load("width", 500));
   const [height, setHeight] = useState(Persistance.load("height", 500));
+
+  const [uploadVisible, setUploadVisible] = useState(false);
 
   //  const [imageMap, setImageMap] = useState(Persistance.load("imageMap", {}));
   const [updatedAt, setUpdatedAt] = useState(new Date());
@@ -99,6 +105,93 @@ function App() {
     });
   }
 
+  function upload() {
+    ConfirmDialog(
+      "This will replace all your traits and load new traits from the zip file. Are you sure?",
+      () => {
+        setUploadVisible(true);
+      }
+    );
+  }
+
+  const onInputChange = (event) => {
+    const files = event.target.files;
+    var oldTraits = [...traits];
+    var newTraits = [];
+    setTraits([]);
+
+    return Promise.all(
+      _.map(files, (file) => {
+        return new Promise((resolve, reject) => {
+          var reader = new FileReader();
+
+          if (file.type === "image/png") {
+            reader.onload = (event) => {
+              var pathSegments = file.webkitRelativePath.split("/");
+              var traitName = "trait-name-goes-here";
+              var value = "unknown value";
+              if (pathSegments.length === 2) {
+                traitName = pathSegments[0];
+                value = _.without(
+                  pathSegments[1].split("."),
+                  _.last(pathSegments[1].split("."))
+                ).join(".");
+              } else if (pathSegments.length === 3) {
+                traitName = pathSegments[1];
+                value = _.without(
+                  pathSegments[2].split("."),
+                  _.last(pathSegments[2].split("."))
+                ).join(".");
+              } else if (pathSegments.length === 1) {
+                value = _.without(
+                  pathSegments[0].split("."),
+                  _.last(pathSegments[0].split("."))
+                ).join(".");
+              }
+
+              console.log("adding", traitName, value);
+              const dataURL = JSON.stringify(event.target.result);
+              var key = TraitValueKey(traitName, value);
+              localStorage.setItem(localStorageKey(key), dataURL);
+              resolve({ traitName, value });
+            };
+
+            reader.onerror = (event) => {
+              console.error(
+                "File could not be read! Code " + event.target.error.code
+              );
+              setTraits(oldTraits);
+            };
+            reader.readAsDataURL(file);
+          } else {
+            reject("not a png");
+          }
+        });
+      })
+    )
+      .then((results) => {
+        console.log("results", results);
+        var newTraits = [];
+        _.each(results, (result) => {
+          var trait = _.find(newTraits, (t) => t.name === result.traitName);
+          if (!trait) {
+            trait = {
+              name: result.traitName,
+              values: [],
+            };
+            newTraits.push(trait);
+          }
+          trait.values.push(result.value);
+        });
+        console.log("newTraits", newTraits);
+        setTraits(newTraits);
+      })
+      .catch((err) => {
+        console.error(err);
+        setTraits(oldTraits);
+      });
+  };
+
   return (
     <Panels
       left={
@@ -137,11 +230,7 @@ function App() {
                     onChange={(e) => setWidth(e.target.value)}
                   />
                 </label>
-                <button onClick={() => setTrait(null)}>Done Drawing!</button>
-                <label>
-                  n combinations
-                  <input type="number" />
-                </label>
+                <button onClick={() => setTrait(null)}>I'm Done Drawing</button>
               </div>
             }
           />
@@ -159,9 +248,26 @@ function App() {
                 {traits.reduce((acc, trait) => acc * trait.values.length, 1)}{" "}
                 possible combinations.
               </p>
-              <p>
-                <button onClick={download}> Download art folder</button>
-              </p>
+              <button onClick={download}> Download art folder</button>
+              <button onClick={upload}> Import art folder</button>
+
+              <div
+                style={{
+                  ...(uploadVisible
+                    ? { display: "block" }
+                    : { display: "none" }),
+                  ...{
+                    margin: "1em",
+                  },
+                }}
+              >
+                <input
+                  type="file"
+                  webkitdirectory=""
+                  onChange={onInputChange}
+                />
+                <p>Select your art folder (PNG files)</p>
+              </div>
             </div>
           </div>
         )

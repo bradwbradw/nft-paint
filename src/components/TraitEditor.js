@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import _, { shuffle } from "lodash";
 import TraitValueKey from "../module/TraitValueKey";
-import ImageUrl from "../module/ImageUrl";
+import { ImageUrl } from "../module/ImageUrl";
 import ConfirmDialog from "../module/ConfirmDialog";
 
 function TraitEditor({

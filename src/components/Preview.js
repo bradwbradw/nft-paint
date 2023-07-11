@@ -3,7 +3,7 @@ import _ from "lodash";
 import { DateTime } from "luxon";
 import TraitEditor from "./TraitEditor";
 import TraitValueKey from "../module/TraitValueKey";
-import ImageUrl from "../module/ImageUrl";
+import { ImageUrl } from "../module/ImageUrl";
 
 function Preview({
   trait,
