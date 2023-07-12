@@ -1,35 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import _ from "lodash";
-import JsPaintIntegration from "../module/jsPaintIntegration";
+import { Resizable } from "re-resizable";
+import { ImageUrl } from "../module/ImageUrl";
 import TraitValueKey from "../module/TraitValueKey";
 
 var jspaint;
 function CanvasEditor({ trait, traitValue, onUpdate, below }) {
   const [id, setId] = useState(null);
-  const jsPaintRef = useRef(null);
 
   useEffect(() => {
     var iframe = document.getElementById("jspaint-iframe");
     jspaint = iframe?.contentWindow;
-    setTimeout(() => {
-      if (jspaint && jspaint.$G) {
-        //JsPaintIntegration.setupHooks(jspaint);
-        console.log("jspaint", jspaint);
-        window.jspaint = jspaint;
+    if (jspaint && jspaint.$G) {
+      //JsPaintIntegration.setupHooks(jspaint);
+      console.log("jspaint", jspaint);
+      window.jspaint = jspaint;
 
-        jspaint.$G.on("persisted-image", () => {
-          console.log("got persisted-image");
-          onUpdate();
-        });
-      } else {
-        console.log("no jspaint.");
-      }
-      var key = TraitValueKey(trait, traitValue);
+      jspaint.$G.on("persisted-image", () => {
+        console.log("got persisted-image");
+        onUpdate();
+      });
+    } else {
+      console.log("no jspaint.");
+    }
+    var key = TraitValueKey(trait, traitValue);
 
-      if (key && key.length > 0) {
-        setId(key);
-      }
-    }, 1000);
+    if (key && key.length > 0) {
+      setId(key);
+    }
+  }, [trait, traitValue]);
+
+  useEffect(() => {
+    var url = ImageUrl(TraitValueKey(trait, traitValue));
+    if (!url) {
+      console.log("no url. clear.");
+      jspaint?.clear();
+    }
   }, [trait, traitValue]);
 
   function makeJsPaintUrl() {
@@ -55,20 +61,19 @@ function CanvasEditor({ trait, traitValue, onUpdate, below }) {
         alignItems: "center",
       }}
     >
-      <h3>Time to Draw!</h3>
-      <h2>
+      <h3 style={{ margin: 0 }}>Time to Draw!</h3>
+      <h2 style={{ margin: 0 }}>
         {trait}: {traitValue}
       </h2>
       <br />
-      <iframe
-        ref={jsPaintRef}
-        src={makeJsPaintUrl()}
-        id="jspaint-iframe"
-        style={{ width: "100%", height: "100%" }}
-      />
-
-      <pre>{makeJsPaintUrl()}</pre>
-
+      <Resizable defaultSize={{ width: "80%", height: "60%" }}>
+        <iframe
+          src={makeJsPaintUrl()}
+          id="jspaint-iframe"
+          width="100%"
+          height="100%"
+        />
+      </Resizable>
       {below}
     </div>
   );

@@ -23,8 +23,8 @@ function App() {
   const [traits, setTraits] = useState(Persistance.load("traits", []));
   const [trait, setTrait] = useState(null);
   const [traitValue, setTraitValue] = useState(null);
-  const [width, setWidth] = useState(Persistance.load("width", 500));
-  const [height, setHeight] = useState(Persistance.load("height", 500));
+  const [width, setWidth] = useState(Persistance.load("width", 150));
+  const [height, setHeight] = useState(Persistance.load("height", 150));
 
   const [uploadVisible, setUploadVisible] = useState(false);
 
@@ -107,7 +107,7 @@ function App() {
 
   function upload() {
     ConfirmDialog(
-      "This will replace all your traits and load new traits from the zip file. Are you sure?",
+      "This will replace all your traits with your directory's subfolder names.",
       () => {
         setUploadVisible(true);
       }
@@ -202,18 +202,7 @@ function App() {
             onUpdate={notifyUpdated}
             below={
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div>
-                  <button
-                    onClick={() => {
-                      toggleLocked(TraitObj(trait), traitValue);
-                    }}
-                  >
-                    {isLocked(TraitObj(trait), traitValue)
-                      ? "unlock "
-                      : "lock "}
-                    {`${trait}:${traitValue}`}
-                  </button>
-                </div>
+                {/*}
                 <label>
                   height
                   <input
@@ -229,8 +218,13 @@ function App() {
                     value={width}
                     onChange={(e) => setWidth(e.target.value)}
                   />
-                </label>
-                <button onClick={() => setTrait(null)}>I'm Done Drawing</button>
+                </label>{*/}
+                <button
+                  style={{ height: "2em", fontSize: "1.5em", margin: "0.5em" }}
+                  onClick={() => setTrait(null)}
+                >
+                  I'm Done Drawing
+                </button>
               </div>
             }
           />
@@ -238,8 +232,19 @@ function App() {
           <div style={{ padding: "2em" }}>
             <h2>NFT paint</h2>
             <div>getting started:</div>
-            <div>1. add traits by using the panel on the right</div>
+            <div>
+              1. add traits by using the Trait Editor panel on the right
+            </div>
             <div>2. click on 🎨 beside a trait's value to start painting!</div>
+            <div>
+              3. scroll down in the Trait Editor to view combination previews.
+            </div>
+            <br />
+            <div>
+              You can "lock" a trait's value so it is always shown in the
+              previews: In the Trait Editor, click on one or more value names or
+              images.
+            </div>
             <div style={{ margin: "1em" }}>
               <p>
                 Your NFT collection has {traits.length} traits,{" "}
@@ -280,6 +285,7 @@ function App() {
           setTraits={setTraits}
           setTrait={setTrait}
           setTraitValue={setTraitValue}
+          activateTrait={activateTrait}
           onUpdate={notifyUpdated}
           updatedAt={updatedAt}
           toggleLocked={toggleLocked}

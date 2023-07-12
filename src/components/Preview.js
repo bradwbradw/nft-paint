@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import TraitEditor from "./TraitEditor";
 import TraitValueKey from "../module/TraitValueKey";
 import { ImageUrl } from "../module/ImageUrl";
+import ConfirmDialog from "../module/ConfirmDialog";
 
 function Preview({
   trait,
@@ -87,6 +88,10 @@ function Preview({
   }, [traits, numCombos, updatedAt]);
   //  shuffle();
 
+  function numberLocked() {
+    return _.size(_.flatten(_.map(traits, "locked")));
+  }
+
   function unlockAll() {
     setTraits((traits) => {
       var newTraits = _.map(traits, (trait) => {
@@ -98,6 +103,8 @@ function Preview({
 
   var width = scale * localStorage.getItem("width") + "px";
   var height = scale * localStorage.getItem("height") + "px";
+  var aspectRatio =
+    localStorage.getItem("width") / localStorage.getItem("height");
   return (
     <>
       <div style={{ margin: "1em" }}>
@@ -116,6 +123,7 @@ function Preview({
       <div
         style={{
           display: "flex",
+          flexWrap: "wrap",
           padding: "1em",
           margin: "1em",
           gap: "1em",
@@ -138,17 +146,20 @@ function Preview({
           />
         </label>
         <label>
-          number of previews
+          number of previews:
           <input
             type="number"
+            style={{ width: "4em" }}
             value={numCombos}
             onChange={(e) => setNumCombos(e.target.value)}
           />
         </label>
-        <label>
-          number locked: {_.size(_.flatten(_.map(traits, "locked")))}
-          <button onClick={unlockAll}>unlock all</button>
-        </label>
+        {numberLocked() > 0 && (
+          <label>
+            {numberLocked()} locked
+            <button onClick={unlockAll}>unlock all</button>
+          </label>
+        )}
       </div>
       {previewingCombos.map((combo, i) => {
         var layers = _.map(combo, ({ trait, value }) => {
@@ -170,17 +181,21 @@ function Preview({
             <div
               style={{
                 position: "relative",
-                border: "1px solid blue",
                 width,
-                height,
-                flexShrink: "0",
+                maxWidth: "100%",
+                aspectRatio,
+                flexShrink: "1",
               }}
             >
               {layers.map((layer) => {
                 return (
                   <img
                     key={layer.key}
-                    style={{ position: "absolute", width, height }}
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                    }}
                     src={layer.url}
                   />
                 );
@@ -236,11 +251,16 @@ function Preview({
       <button
         style={{ marginTop: "50em", color: "red" }}
         onClick={() => {
-          traits.map((trait) => {
-            trait.values.map((val) => {
-              var key = TraitValueKey(trait.name, val);
-              localStorage.removeItem("image#" + key);
+          ConfirmDialog("This will delete all your images and traits.", () => {
+            traits.map((trait) => {
+              trait.values.map((val) => {
+                var key = TraitValueKey(trait.name, val);
+                localStorage.removeItem("image#" + key);
+              });
             });
+            setTimeout(() => {
+              setTraits([]);
+            }, 1000);
           });
         }}
       >
