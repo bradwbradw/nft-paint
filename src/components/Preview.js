@@ -266,6 +266,7 @@ function Preview({
       >
         clear all
       </button>
+      <pre>(c) 2023 Blue-Green Crypto version 0.01</pre>
     </>
   );
 }
