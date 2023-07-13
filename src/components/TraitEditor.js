@@ -15,12 +15,13 @@ function TraitEditor({
   isLocked,
   toggleLocked,
 }) {
-  const [newTrait, setNewTrait] = useState({ name: null, values: [] });
+  var defaultNewTrait = { name: null, values: [] };
+  const [newTrait, setNewTrait] = useState(defaultNewTrait);
   const [modifyingTraitIndex, setModifyingTraitIndex] = useState(null);
 
   function addTrait(p) {
     setTraits((traits) => _.uniq([...traits, p]));
-    setNewTrait("");
+    setNewTrait(defaultNewTrait);
   }
   function deleteTrait(p) {
     setTraits((traits) => _.without(traits, p));
@@ -36,7 +37,8 @@ function TraitEditor({
       !_.isEmpty(newTrait.name) &&
       _.isArray(newTrait.values) &&
       _.size(newTrait.values) > 0 &&
-      !_.includes(newTrait.values, "")
+      !_.includes(newTrait.values, "") &&
+      !_.some(traits, (t) => t.name === newTrait.name)
     );
   }
 
@@ -63,21 +65,17 @@ function TraitEditor({
   function NewTrait() {
     return (
       <>
-        {_.isObject(newTrait) && _.isString(newTrait.name) ? null : (
+        {!_.isString(newTrait.name) ? (
           <button
             onClick={(e) => {
-              setNewTrait({
-                name: "",
-                values: [],
-              });
+              setNewTrait(defaultNewTrait);
               e.preventDefault();
             }}
           >
             {" "}
             add new trait{" "}
           </button>
-        )}
-        {_.isObject(newTrait) && _.isString(newTrait.name) ? (
+        ) : (
           <>
             <input
               autoFocus
@@ -90,7 +88,6 @@ function TraitEditor({
                 });
               }}
               onKeyUp={(event) => {
-                console.log(event.key);
                 if (event.key === "Enter") {
                   if (canCreateNewTrait()) {
                     addTrait(newTrait);
@@ -168,7 +165,7 @@ function TraitEditor({
             ) : (
               <button
                 onClick={() => {
-                  setNewTrait({ name: null, values: [] });
+                  setNewTrait(defaultNewTrait);
                 }}
               >
                 nevermind
@@ -186,7 +183,7 @@ function TraitEditor({
                     setModifyingTraitIndex(null);
                     return newTraits;
                   });
-                  setNewTrait({ name: null, values: [] });
+                  setNewTrait(defaultNewTrait);
                   if (changeTrait) {
                     setTrait(null);
                     changeTrait = null;
@@ -200,7 +197,7 @@ function TraitEditor({
               finish: {newTrait.name}
             </button>
           </>
-        ) : null}
+        )}
       </>
     );
   }
@@ -208,10 +205,8 @@ function TraitEditor({
     <>
       <div style={style}>
         {_.map(traits, (trait, i) => {
-          if (newTrait.name && modifyingTraitIndex === i) {
+          if (_.isString(newTrait.name) && modifyingTraitIndex === i) {
             return <div key={"new trait"}>{NewTrait()}</div>;
-          } else if (newTrait.name === trait.name) {
-            return null;
           } else {
             return (
               <div key={trait.name} style={{ display: "flex" }}>
@@ -367,6 +362,9 @@ function TraitEditor({
         })}
       </div>
       {modifyingTraitIndex === null && NewTrait()}
+      <pre>new t: {JSON.stringify(newTrait, null, 2)}</pre>
+      <pre>modifying index: {modifyingTraitIndex}</pre>
+      <pre>{JSON.stringify(traits, null, 2)}</pre>
     </>
   );
 }
