@@ -285,7 +285,6 @@ function App() {
           setTraits={setTraits}
           setTrait={setTrait}
           setTraitValue={setTraitValue}
-          activateTrait={activateTrait}
           onUpdate={notifyUpdated}
           updatedAt={updatedAt}
           toggleLocked={toggleLocked}
