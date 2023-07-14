@@ -120,6 +120,7 @@ function Preview({
           style={{ width: "49%", display: "inline" }}
         />
       </div>
+
       <div
         style={{
           display: "flex",
@@ -130,37 +131,45 @@ function Preview({
           border: "1px dashed black",
         }}
       >
-        <button
-          style={{ border: "2px solid pink", fontSize: "1.2em" }}
-          onClick={shuffle}
-        >
-          (re)generate previews
-        </button>
+        {" "}
+        {traits.length > 1 ? (
+          <>
+            <button
+              style={{ border: "2px solid pink", fontSize: "1.2em" }}
+              onClick={shuffle}
+            >
+              (re)generate previews
+            </button>
 
-        <label>
-          auto-generate
-          <input
-            type="checkbox"
-            checked={autoShuffle}
-            onChange={(e) => setAutoShuffle(e.target.checked)}
-          />
-        </label>
-        <label>
-          number of previews:
-          <input
-            type="number"
-            style={{ width: "4em" }}
-            value={numCombos}
-            onChange={(e) => setNumCombos(e.target.value)}
-          />
-        </label>
-        {numberLocked() > 0 && (
-          <label>
-            {numberLocked()} locked
-            <button onClick={unlockAll}>unlock all</button>
-          </label>
+            <label>
+              auto-generate
+              <input
+                type="checkbox"
+                checked={autoShuffle}
+                onChange={(e) => setAutoShuffle(e.target.checked)}
+              />
+            </label>
+            <label>
+              number of previews:
+              <input
+                type="number"
+                style={{ width: "4em" }}
+                value={numCombos}
+                onChange={(e) => setNumCombos(e.target.value)}
+              />
+            </label>
+            {numberLocked() > 0 && (
+              <label>
+                {numberLocked()} locked
+                <button onClick={unlockAll}>unlock all</button>
+              </label>
+            )}
+          </>
+        ) : (
+          <i>Create at least two traits to see preview images</i>
         )}
       </div>
+
       {previewingCombos.map((combo, i) => {
         var layers = _.map(combo, ({ trait, value }) => {
           var key = TraitValueKey(trait, value);
