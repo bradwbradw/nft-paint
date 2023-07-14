@@ -32,9 +32,9 @@ function CanvasEditor({ trait, traitValue, onUpdate, below }) {
 
   useEffect(() => {
     var url = ImageUrl(TraitValueKey(trait, traitValue));
-    if (!url) {
+    if (!url && jspaint && _.isFunction(jspaint.clear)) {
       console.log("no url. clear.");
-      jspaint?.clear();
+      jspaint.clear();
     }
   }, [trait, traitValue]);
 
