@@ -367,9 +367,10 @@ function TraitEditor({
         })}
         {modifyingTraitIndex === null ? NewTrait() : null}
       </div>
+      {/*}
       <pre>new t: {JSON.stringify(newTrait, null, 2)}</pre>
       <pre>modifying index: {modifyingTraitIndex}</pre>
-      <pre>{JSON.stringify(traits, null, 2)}</pre>
+      <pre>{JSON.stringify(traits, null, 2)}</pre>{*/}
     </>
   );
 }
