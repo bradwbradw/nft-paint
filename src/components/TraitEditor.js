@@ -219,7 +219,11 @@ function TraitEditor({
                   style={{
                     flexGrow: "2",
                     border: "1px solid green",
+                    // rounded corners
+                    borderRadius: "5px",
+
                     padding: "0.5em",
+                    margin: "0.2em 0",
                     display: "flex",
                     gap: "1em",
                   }}
