@@ -253,9 +253,15 @@ function App() {
                 {traits.reduce((acc, trait) => acc * trait.values.length, 1)}{" "}
                 possible combinations.
               </p>
-              <button onClick={download}> Download art folder</button>
-              <button onClick={upload}> Import art folder</button>
 
+              {traits.length > 1 ? (
+                <>
+                  <button onClick={download}> Download art folder</button>
+                  <button onClick={upload}> Import art folder</button>
+                </>
+              ) : (
+                <> </>
+              )}
               <div
                 style={{
                   ...(uploadVisible
